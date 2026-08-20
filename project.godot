@@ -9,15 +9,13 @@ config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
 [display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
-
-[display/window]
-size/viewport_width=1280
-size/viewport_height=720
-size/window_width_override=1280
-size/window_height_override=720
-handheld/orientation=0
+window/handheld/orientation=0
 
 [physics]
 3d/physics_engine="Jolt Physics"
