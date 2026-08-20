@@ -9,7 +9,7 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,6 +28,10 @@ jobs:
         run: |
           ./Godot_v4.7.1-stable_linux.x86_64 --headless --path . --quit-after 15
 
-      - name: Smoke test City Zero gameplay scene
+      - name: Smoke test Aster Valley
         run: |
           ./Godot_v4.7.1-stable_linux.x86_64 --headless --path . --quit-after 60 res://scenes/main.tscn
+
+      - name: Smoke test Coastline Fortress
+        run: |
+          ./Godot_v4.7.1-stable_linux.x86_64 --headless --path . --quit-after 60 res://scenes/coastline_fortress.tscn
