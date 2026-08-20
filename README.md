@@ -2,81 +2,64 @@
 
 Mobile-first military science-fiction FPS built with **Godot 4 / GDScript**.
 
-## Prototype 0.02 — NEXUS FALL
+## Prototype 0.03 — ASTER VALLEY
 
-The active `development` branch now includes a larger vertical slice focused on an original classic-sci-fi supersoldier feel, modernized for Android.
+The active `development` branch now uses a heavier, more realistic open-environment direction: large natural landscapes, monumental original sci-fi architecture, supersoldier combat and a cinematic mobile profile.
 
-### Command / campaign UI
+## Active world — Aster Valley
 
-- Futuristic main menu.
-- Campaign selector.
-- Six defined worlds.
-- Performance and battery FPS profiles.
-- City Zero deployment flow.
+`ASTER VALLEY // FIRST CONTACT` is now the first playable campaign world.
 
-### City Zero vertical slice
+The level is generated without external assets and currently includes:
 
-- Redesigned urban battlefield generated without external assets.
-- Futuristic boulevard, ruins, gate, transit bridge, skyline, barricades and emissive navigation elements.
-- Mobile-friendly visual-only distant geometry and debris.
-- Objective flow: eliminate HELIX forces → reach extraction → mission complete → return to command.
-
-### VANGUARD player
-
-- FPS movement.
-- Sprint.
-- Jump.
-- Mouse/touch camera.
-- Rechargeable 100-point energy shield.
-- 100-point core health.
-- Damage feedback.
-- Mobile controls.
-
-### VX-7 rifle
-
-- Automatic hitscan fire.
-- 30-round magazine.
-- Reserve ammunition.
-- Reload animation motion.
-- ADS / aim-down-sights.
-- Recoil.
-- Muzzle flash.
-- Hit sparks.
-- Futuristic first-person procedural model and armored forearms.
-
-### HELIX enemy roster
-
-- Rifleman.
-- Scout.
-- Heavy.
-- Commander.
-- Combat Drone.
-- Line-of-sight attacks.
-- Red/orange tracer fire.
-- Different speed, health, range and damage profiles.
-
-### HUD
-
-- VANGUARD shield bar.
-- Core health bar.
-- VX-7 ammunition panel.
-- Mission objective.
-- Hostile counter.
-- Hitmarker.
-- Damage overlay.
-- NEXUS tactical status messages.
-- Android FIRE / ADS / JUMP / RELOAD buttons.
+- 260 x 320 meter procedural terrain.
+- Mountain valley heightfield with real collision.
+- Large distant mountain masses.
+- River channel.
+- 200+ instanced pine trees.
+- 90+ instanced boulders.
+- VANGUARD landing zone.
+- HELIX occupation fortress.
+- Futuristic bridge.
+- Monumental sci-fi skyline landmark.
+- Distant outpost/city silhouette.
+- Warm sun + cool sky fill lighting.
+- Procedural sky and atmospheric fog.
+- Rechargeable VANGUARD shield system.
+- VX-7 automatic rifle with ADS.
+- HELIX Rifleman, Scout, Heavy and Commander units.
+- HELIX combat drones.
+- Mission loop: breach the valley → eliminate occupation force → return to extraction.
 
 ## Campaign worlds
 
-1. **CITY ZERO — The Fall**
-2. **IRON WASTELAND — Foundry War**
-3. **SKYLINE ARC — Vertical Front**
-4. **FROST BASTION — White Silence**
-5. **RED SAND COLONY — Off-World**
-6. **HELIX CORE — Last Directive**
+1. **ASTER VALLEY — First Contact** — playable.
+2. **COASTLINE FORTRESS — Broken Tide** — planned.
+3. **NOVA CITY — Neon Siege** — planned.
+4. **FROST RANGE — White Signal** — planned.
+5. **RED DESERT FRONT — Colony War** — planned.
+6. **HELIX ASCENT — Last Directive** — planned.
 
-Only City Zero is currently deployable. The other five chapters are represented in the campaign interface and defined in the design documents for future production.
+The campaign screen has been redesigned around these large-biome worlds.
+
+## Visual direction
+
+FUTUREWAR is not intended to be a copy of any existing franchise. The target is an original military sci-fi identity built around:
+
+- large outdoor battle spaces;
+- forests, cliffs, water, snow, deserts and cities;
+- clean monumental future architecture;
+- readable supersoldier silhouettes;
+- strong visor/energy accents;
+- realistic daylight and atmospheric depth;
+- heavier geometry on the cinematic profile;
+- scalable quality for Android devices.
+
+## Performance profiles
+
+The command screen currently defaults to a **30 FPS cinematic profile** to favor visual density. A 60 FPS profile can be toggled from the campaign interface for testing.
+
+This does not guarantee 30/60 FPS on every Android device. Physical-device profiling is required before release.
 
 ## Run locally
 
@@ -85,15 +68,15 @@ git checkout development
 git pull origin development
 ```
 
-Open the repository folder in Godot 4.7.x and press **F6/F5**.
+Open the repository folder in Godot 4.7.x and press **F5**.
 
-The project now boots into:
+Boot scene:
 
 ```text
 res://scenes/boot.tscn
 ```
 
-Campaign deployment loads:
+Active gameplay scene:
 
 ```text
 res://scenes/main.tscn
@@ -114,15 +97,15 @@ Esc         Capture/release mouse
 
 ## Android controls
 
-- Left screen region: virtual movement input.
+- Left screen region: movement.
 - Right screen region: camera drag.
 - FIRE: shoot.
 - ADS: aim.
 - JUMP: jump.
 - RLD: reload.
-- Landscape layout.
+- Landscape orientation.
 
-## Active v2 structure
+## Active structure
 
 ```text
 FUTUREWAR/
@@ -134,7 +117,8 @@ FUTUREWAR/
 │   ├── boot.tscn
 │   └── main.tscn
 ├── scripts/
-│   ├── boot.gd
+│   ├── boot_v2.gd
+│   ├── aster_valley.gd
 │   ├── main_v2.gd
 │   ├── player_v2.gd
 │   ├── weapon_v2.gd
@@ -144,26 +128,12 @@ FUTUREWAR/
 └── icon.svg
 ```
 
-The original Prototype 0.01 scripts remain in the repository temporarily as fallback/reference while 0.02 is tested on the user's Godot installation.
+The original prototype scripts remain temporarily as fallback/reference while the new world direction is tested.
 
-## Design documents
+## Automated validation
 
-- `docs/GAME_DESIGN.md` — story, factions, classes, enemies, weapons, campaign, modes and monetization principles.
-- `docs/ART_DIRECTION.md` — original armor, faction, HUD, weapon and world visual language.
-- `docs/MOBILE_TARGETS.md` — Android frame-rate, geometry, texture, lighting, physics and profiling targets.
-
-## Current priority
-
-Before adding production 3D models, animations or multiplayer, Prototype 0.02 must be run in Godot and on a physical Android phone. Any parser/runtime errors should be fixed first, then we profile City Zero and move into production art.
+GitHub Actions imports the Godot project headlessly and smoke-tests both the command interface and the gameplay scene. This catches parser and many startup errors before local testing.
 
 ## Security
 
-Never commit:
-
-- Android keystores / `.jks` files;
-- signing passwords;
-- API keys;
-- secrets;
-- generated Android build directories.
-
-These are excluded by `.gitignore`.
+Never commit Android keystores, `.jks` files, signing passwords, API keys, secrets or generated Android build directories. These are excluded by `.gitignore`.
