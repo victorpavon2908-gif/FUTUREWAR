@@ -269,7 +269,7 @@ func _spawn_ground_pulse(color: Color, radius_value: float) -> void:
 	pulse.scale = Vector3(0.2, 0.2, 0.2)
 	var tween: Tween = pulse.create_tween()
 	tween.tween_property(pulse, "scale", Vector3(radius_value, 0.12, radius_value), 0.20)
-	tween.parallel().tween_property(pulse, "modulate:a", 0.0, 0.20)
+	tween.parallel().tween_property(pulse, "transparency", 1.0, 0.20)
 	tween.tween_callback(pulse.queue_free)
 
 
