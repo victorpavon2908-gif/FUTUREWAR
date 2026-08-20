@@ -2,33 +2,33 @@
 
 Mobile-first military science-fiction FPS built with **Godot 4 / GDScript**.
 
-## Current production target — Coastline Fortress
+## Current production target — TERRAIN MASTER PASS
 
-The **main branch** is now the active production branch.
+The **main branch** is the active production branch.
 
-`COASTLINE FORTRESS // BROKEN TIDE` is the visual priority and default deployment world. The level uses original FUTUREWAR geometry and only studies classic FPS maps for composition, pacing, traversal and landmarking.
+For this pass, combat, enemies, weapons and fortress art are intentionally frozen while the terrain is rebuilt first. `scenes/main.tscn` and the Coastline deployment now open a terrain-only survey world.
 
-Current production pass includes:
+### Terrain goals
 
-- original procedural cliff-island terrain;
-- animated ocean shader with vertex waves and fresnel response;
-- procedural terrain surface variation;
-- irregular generated cliff/rock chunks with moss/strata shading;
-- panelized HELIX metal shader;
-- layered central command hub and reactor;
-- radial bridges, railings and assault ramp;
-- side batteries and northern monolith;
-- VANGUARD landing zone;
-- compact combat HUD;
-- slimmer VX-7 first-person production model;
-- HELIX infantry, Heavy, Commander and drones;
-- mission loop: land → breach fortress → eliminate HELIX → return to LZ;
-- 30 FPS cinematic mobile target with 60 FPS test mode.
+- one continuous 340 x 340 meter playable ground mesh;
+- no intentional holes between platforms or terrain pieces;
+- full collision across the visible ground;
+- broad mountain walls and hero rock formations;
+- open central valley inspired by classic large-scale sci-fi FPS level composition;
+- traversable shelves and natural elevation changes;
+- shallow winding river with a real riverbed beneath it;
+- grass, rock, highland and riverbank surface variation;
+- procedural terrain shader for macro/micro variation;
+- scattered rock fields and pine groves;
+- perimeter collision to stop accidental map exits;
+- hidden emergency catch floor and automatic rescue if the player somehow falls below the map.
+
+No enemies, gun or combat HUD are used in the terrain survey scene. The point of this pass is to judge only the land, scale, routes, mountains, river and traversal quality before architecture is added back.
 
 ## Playable worlds
 
-1. **COASTLINE FORTRESS — Broken Tide** — active production world.
-2. **ASTER VALLEY — First Contact** — playable legacy world.
+1. **COASTLINE TERRAIN MASTER** — active terrain production pass.
+2. **ASTER VALLEY — First Contact** — legacy comparison world.
 3. **RIFT CANYON — Three Levels** — planned.
 4. **FROST RANGE — White Signal** — planned.
 5. **NOVA CITY — Neon Siege** — planned.
@@ -41,34 +41,20 @@ git checkout main
 git pull origin main
 ```
 
-Open the repository in Godot 4.7.x and press **F5**.
+Open the repository in Godot 4.7.x.
 
-The command screen now selects **Coastline Fortress by default**.
+- **F5** → command screen → Coastline deploy opens the terrain-only pass.
+- **F6** on `scenes/main.tscn` → opens the terrain survey directly.
 
-If you press **F6** while `scenes/main.tscn` is open, it also launches the Coastline production world directly.
-
-## Desktop controls
+## Terrain survey controls
 
 ```text
 WASD        Move
 Shift       Sprint
 Space       Jump
 Mouse       Look
-LMB         Fire
-RMB         ADS
-R           Reload
 Esc         Capture/release mouse
 ```
-
-## Android controls
-
-- Left screen region: movement.
-- Right screen region: camera drag.
-- FIRE: shoot.
-- ADS: aim.
-- JUMP: jump.
-- RLD: reload.
-- Landscape orientation.
 
 ## Important art rule
 
