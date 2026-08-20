@@ -147,7 +147,6 @@ func _spawn_player() -> void:
 	player.position = Vector3(0.0, 1.05, 25.0)
 	add_child(player)
 
-
 func _spawn_enemies() -> void:
 	var spawn_points := [
 		Vector3(-4.0, 1.05, 8.0),
@@ -256,7 +255,7 @@ func _build_hud() -> void:
 	player.died.connect(_on_player_died)
 	if player.weapon != null:
 		player.weapon.hit_confirmed.connect(_show_hitmarker)
-		var ammo := player.get_weapon_ammo()
+		var ammo: Vector2i = player.get_weapon_ammo()
 		_on_player_ammo_changed(ammo.x, ammo.y)
 	_on_player_health_changed(player.health, player.max_health)
 
