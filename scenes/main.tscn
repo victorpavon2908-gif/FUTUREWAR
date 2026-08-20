@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://scripts/aster_valley.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/coastline_fortress_final.gd" id="1_world"]
 
-[node name="FUTUREWAR_AsterValley" type="Node3D"]
-script = ExtResource("1_main")
+[node name="FUTUREWAR_CoastlineFortress_Production" type="Node3D"]
+script = ExtResource("1_world")
