@@ -1,6 +1,8 @@
 extends "res://scripts/coastline_fortress_production.gd"
 
 const PLAYER_FINAL: Script = preload("res://scripts/player_v3.gd")
+const BIOFORGE_ENEMY: Script = preload("res://scripts/enemy_bioforge.gd")
+const DRONE_FINAL: Script = preload("res://scripts/drone.gd")
 
 var last_safe_player_position: Vector3 = Vector3.ZERO
 var safe_position_timer: float = 0.0
@@ -19,6 +21,58 @@ func _spawn_player() -> void:
 	player.position = _extraction_world_position() + Vector3(0.0, 1.15, -2.0)
 	last_safe_player_position = player.position
 	add_child(player)
+
+
+func _spawn_enemies() -> void:
+	# ENEMY PACK 01 // HELIX BIOFORGE
+	# Four original silhouettes with distinct combat roles are distributed across the natural
+	# approach and fortress platforms so the player learns each threat before the central fight.
+	var terrain_units: Array = [
+		[Vector3(-18.0, 0.0, 54.0), "glyph_crawler"],
+		[Vector3(19.0, 0.0, 48.0), "phase_lancer"],
+		[Vector3(-30.0, 0.0, 27.0), "carapace_crawler"],
+		[Vector3(31.0, 0.0, 21.0), "glyph_crawler"]
+	]
+	for i: int in range(terrain_units.size()):
+		var raw: Vector3 = terrain_units[i][0] as Vector3
+		var type_name: String = String(terrain_units[i][1])
+		var lift: float = 0.82 if type_name == "carapace_crawler" else 1.12
+		_spawn_bioforge_enemy(Vector3(raw.x, _terrain_height_at(raw.x, raw.z) + lift, raw.z), type_name, i)
+
+	var platform_units: Array = [
+		[Vector3(0.0, PLATFORM_Y + 1.12, 15.0), "glyph_crawler"],
+		[Vector3(-34.0, PLATFORM_Y + 0.42, -12.0), "phase_lancer"],
+		[Vector3(34.0, PLATFORM_Y + 0.42, -12.0), "glyph_crawler"],
+		[Vector3(-7.0, PLATFORM_Y + 1.35, -10.0), "threshborn"],
+		[Vector3(8.0, PLATFORM_Y + 0.94, -7.0), "carapace_crawler"],
+		[Vector3(0.0, PLATFORM_Y + 2.05, -49.0), "phase_lancer"]
+	]
+	for j: int in range(platform_units.size()):
+		_spawn_bioforge_enemy(platform_units[j][0] as Vector3, String(platform_units[j][1]), j + terrain_units.size())
+
+	var drone_positions: Array[Vector3] = [
+		Vector3(-28.0, PLATFORM_Y + 10.0, -10.0),
+		Vector3(28.0, PLATFORM_Y + 11.0, -18.0)
+	]
+	for k: int in range(drone_positions.size()):
+		var drone: CharacterBody3D = CharacterBody3D.new()
+		drone.name = "HELIX_BioDrone_%02d" % (k + 1)
+		drone.set_script(DRONE_FINAL)
+		drone.set("target", player)
+		drone.position = drone_positions[k]
+		add_child(drone)
+
+	total_enemies = terrain_units.size() + platform_units.size() + drone_positions.size()
+
+
+func _spawn_bioforge_enemy(world_position: Vector3, type_name: String, index: int) -> void:
+	var enemy: CharacterBody3D = CharacterBody3D.new()
+	enemy.name = "HELIX_%s_%02d" % [type_name.to_upper(), index + 1]
+	enemy.set_script(BIOFORGE_ENEMY)
+	enemy.set("unit_type", type_name)
+	enemy.set("target", player)
+	enemy.position = world_position
+	add_child(enemy)
 
 
 func _process(delta: float) -> void:
