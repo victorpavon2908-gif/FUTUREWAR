@@ -1,10 +1,10 @@
 ; Engine configuration file.
-; FUTUREWAR - Godot 4 mobile FPS prototype
+; FUTUREWAR - mobile-first sci-fi FPS
 config_version=5
 
 [application]
 config/name="FUTUREWAR"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/boot.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
