@@ -1,3 +1,17 @@
-# Godot 4+ specific ignores
+# Godot generated cache
 .godot/
+
+# Android custom build / generated files
 /android/
+/builds/
+
+# Signing and local credentials - never commit these
+*.keystore
+*.jks
+export_credentials.cfg
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
