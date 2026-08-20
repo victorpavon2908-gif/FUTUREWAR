@@ -23,3 +23,11 @@ jobs:
       - name: Import project and parse scripts
         run: |
           ./Godot_v4.7.1-stable_linux.x86_64 --headless --editor --path . --quit
+
+      - name: Smoke test command interface
+        run: |
+          ./Godot_v4.7.1-stable_linux.x86_64 --headless --path . --quit-after 15
+
+      - name: Smoke test City Zero gameplay scene
+        run: |
+          ./Godot_v4.7.1-stable_linux.x86_64 --headless --path . --quit-after 60 res://scenes/main.tscn
