@@ -170,7 +170,7 @@ func _ensure_key_action(action_name: StringName, keycode: Key) -> void:
 		InputMap.action_add_event(action_name, event)
 
 
-func _ensure_mouse_action(action_name: StringName, button_index: MouseButton) -> void:
+func _ensure_mouse_action(action_name: StringName, button_index: int) -> void:
 	if not InputMap.has_action(action_name):
 		InputMap.add_action(action_name)
 	if InputMap.action_get_events(action_name).is_empty():
