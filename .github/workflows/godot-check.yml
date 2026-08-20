@@ -2,7 +2,7 @@ name: Godot Project Check
 
 on:
   push:
-    branches: [development]
+    branches: [main, development]
   pull_request:
     branches: [main]
 
@@ -28,10 +28,14 @@ jobs:
         run: |
           ./Godot_v4.7.1-stable_linux.x86_64 --headless --path . --quit-after 15
 
-      - name: Smoke test Aster Valley
+      - name: Smoke test active production world
         run: |
           ./Godot_v4.7.1-stable_linux.x86_64 --headless --path . --quit-after 60 res://scenes/main.tscn
 
       - name: Smoke test Coastline Fortress
         run: |
           ./Godot_v4.7.1-stable_linux.x86_64 --headless --path . --quit-after 60 res://scenes/coastline_fortress.tscn
+
+      - name: Smoke test Aster Valley legacy scene
+        run: |
+          ./Godot_v4.7.1-stable_linux.x86_64 --headless --path . --quit-after 60 res://scenes/aster_valley.tscn
