@@ -170,9 +170,23 @@ func _postprocess_jefe_external_model() -> void:
 		return
 
 	var production_3d: Node3D = production as Node3D
-	# Both imported JEFE bodies are aligned here to FUTUREWAR's -Z forward direction.
-	production_3d.rotation_degrees.y = 180.0
+	# The AccuRIG FBX already faces FUTUREWAR's -Z gameplay direction. The old
+	# unrigged GLB required a 180-degree correction. Detect the skeleton so the
+	# third-person camera sees JEFE's back instead of his chest.
+	if _contains_skeleton(production_3d):
+		production_3d.rotation_degrees.y = 0.0
+	else:
+		production_3d.rotation_degrees.y = 180.0
 	_fix_imported_materials(production_3d)
+
+
+func _contains_skeleton(node: Node) -> bool:
+	if node is Skeleton3D:
+		return true
+	for child: Node in node.get_children():
+		if _contains_skeleton(child):
+			return true
+	return false
 
 
 func _fix_imported_materials(node: Node) -> void:
@@ -213,7 +227,6 @@ func _build_combat_overlay() -> void:
 	combat_overlay.set_script(COMBAT_SCRIPT)
 	add_child(combat_overlay)
 	combat_overlay.call("setup", body_model)
-	combat_overlay.call("set_weapon_index", 0)
 
 
 func _configure_actions() -> void:
