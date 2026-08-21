@@ -12,6 +12,14 @@ var jefe_joint: StandardMaterial3D
 var jefe_metal: StandardMaterial3D
 
 
+func _ready() -> void:
+	super._ready()
+	if arms_root != null:
+		arms_root.name = "JEFE_FIRST_PERSON_ARMS"
+	if weapon_root != null:
+		weapon_root.name = "JEFE_WEAPON_ROOT"
+
+
 func _build_materials() -> void:
 	super._build_materials()
 	jefe_armor = _mat(Color(0.235, 0.255, 0.145), 0.54, 0.43)
