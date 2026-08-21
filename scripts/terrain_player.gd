@@ -127,7 +127,7 @@ func _build_view_system() -> void:
 
 	third_camera = Camera3D.new()
 	third_camera.name = "JEFE_CHARACTER_CAMERA"
-	third_camera.position = Vector3(0.0, 1.08, 4.85)
+	third_camera.position = Vector3(0.0, 1.08, 4.25)
 	third_camera.fov = 64.0
 	third_camera.near = 0.08
 	third_camera.current = false
@@ -141,6 +141,48 @@ func _build_jefe_body() -> void:
 	body_model.set_script(BODY_SCRIPT)
 	body_model.visible = false
 	add_child(body_model)
+	call_deferred("_postprocess_jefe_external_model")
+
+
+func _postprocess_jefe_external_model() -> void:
+	if body_model == null:
+		return
+	var production: Node = body_model.find_child("JEFE_PRODUCTION_MODEL", true, false)
+	if production == null or not production is Node3D:
+		return
+
+	var production_3d: Node3D = production as Node3D
+	# The downloaded GLB faces +Z while FUTUREWAR's player faces -Z.
+	production_3d.rotation_degrees.y = 180.0
+	_fix_imported_materials(production_3d)
+
+
+func _fix_imported_materials(node: Node) -> void:
+	if node is MeshInstance3D:
+		var mesh_instance: MeshInstance3D = node as MeshInstance3D
+		if mesh_instance.mesh != null:
+			for surface: int in range(mesh_instance.mesh.get_surface_count()):
+				var source_material: Material = mesh_instance.mesh.surface_get_material(surface)
+				if source_material is StandardMaterial3D:
+					var fixed_material: StandardMaterial3D = (source_material as StandardMaterial3D).duplicate() as StandardMaterial3D
+					# Some converted Sketchfab GLBs expose a grayscale map as emission in Godot,
+					# which makes the whole character render almost pure white. Disable it.
+					fixed_material.emission_enabled = false
+
+					# Keep every imported PBR texture while applying JEFE's military palette.
+					var material_name: String = String(fixed_material.resource_name).to_lower()
+					if material_name.contains("pants") or material_name == "material":
+						fixed_material.albedo_color = Color(0.48, 0.52, 0.43, 1.0)
+						fixed_material.metallic = 0.08
+						fixed_material.roughness = 0.78
+					else:
+						fixed_material.albedo_color = Color(0.55, 0.62, 0.34, 1.0)
+						fixed_material.metallic = 0.30
+						fixed_material.roughness = 0.50
+					mesh_instance.set_surface_override_material(surface, fixed_material)
+
+	for child: Node in node.get_children():
+		_fix_imported_materials(child)
 
 
 func _build_weapon_rig() -> void:
