@@ -1,8 +1,9 @@
 extends Node
 
 # Third-person combat layer for JEFE.
-# Runs after jefe_body.gd updates locomotion, then locks the upper body into an
-# armed stance and attaches a visible weapon to the AccuRIG right-hand bone.
+# Runs after locomotion so the legs keep moving while the upper body stays in a
+# believable armed-ready pose. The visible third-person weapon is attached to
+# the AccuRIG right-hand bone.
 
 var body_model: Node3D
 var skeleton: Skeleton3D
@@ -18,6 +19,7 @@ var weapon_dark: StandardMaterial3D
 var weapon_metal: StandardMaterial3D
 var weapon_olive: StandardMaterial3D
 var weapon_tan: StandardMaterial3D
+var weapon_rubber: StandardMaterial3D
 var sight_glow: StandardMaterial3D
 
 
@@ -56,7 +58,7 @@ func _find_skeleton(node: Node) -> Skeleton3D:
 
 func _cache_bones() -> void:
 	var names: Array[String] = [
-		"CC_Base_Spine01", "CC_Base_Spine02", "CC_Base_Head",
+		"CC_Base_Waist", "CC_Base_Spine01", "CC_Base_Spine02", "CC_Base_Head",
 		"CC_Base_L_Clavicle", "CC_Base_R_Clavicle",
 		"CC_Base_L_Upperarm", "CC_Base_R_Upperarm",
 		"CC_Base_L_Forearm", "CC_Base_R_Forearm",
@@ -75,51 +77,62 @@ func apply_combat_pose(delta: float, speed_ratio: float, sprinting: bool, airbor
 	var move_amount: float = clampf(speed_ratio, 0.0, 1.0)
 	var aim_boost: float = 1.0 if aiming else 0.0
 
-	# Keep the rifle/pistol shouldered while walking. Sprint lowers it slightly but
-	# JEFE remains visibly ready for combat instead of returning to a mannequin gait.
+	# Own the upper torso after the locomotion pass. This keeps the shoulders
+	# squared and prevents the old walk arm-swing from fighting the weapon pose.
+	var sprint_lean: float = 3.0 if sprinting else 0.0
+	var air_lean: float = 2.0 if airborne else 0.0
+	_set_from_base("CC_Base_Waist", -1.5 - sprint_lean * 0.25, 1.0, 0.0)
+	_set_from_base("CC_Base_Spine01", -3.0 - sprint_lean * 0.45 - air_lean, 2.5, 0.0)
+	_set_from_base("CC_Base_Spine02", -5.0 - sprint_lean * 0.30, 4.0, 0.0)
+	_set_from_base("CC_Base_Head", 4.0 + aim_boost * 1.5, -3.0, 0.0)
+
 	if equipped_index == 0:
 		_apply_pistol_stance(sprinting, airborne, aim_boost)
 	else:
 		_apply_rifle_stance(sprinting, airborne, aim_boost)
 
-	# A little upper-body life so the pose does not look frozen on top of moving legs.
-	var sway: float = sin(Time.get_ticks_msec() * 0.0065) * deg_to_rad(0.55) * move_amount
-	_add_current_rotation("CC_Base_Spine02", deg_to_rad(-2.5) - deg_to_rad(1.2) * aim_boost, 0.0, sway)
-	_add_current_rotation("CC_Base_Head", deg_to_rad(1.7) + deg_to_rad(0.8) * aim_boost, 0.0, -sway * 0.35)
+	# Small breathing/sway only. Keep it subtle so the weapon reads as controlled.
+	var sway: float = sin(Time.get_ticks_msec() * 0.0055) * deg_to_rad(0.32) * (0.35 + move_amount * 0.65)
+	_add_current_rotation("CC_Base_Spine02", 0.0, 0.0, sway)
+	_add_current_rotation("CC_Base_Head", 0.0, 0.0, -sway * 0.25)
 
 	if weapon_root != null:
-		var recoil_target: float = -0.018 if Input.is_action_pressed("shoot") else 0.0
-		weapon_root.position.z = lerpf(weapon_root.position.z, _weapon_base_position().z + recoil_target, minf(delta * 18.0, 1.0))
+		var base_pos: Vector3 = _weapon_base_position()
+		var recoil: float = 0.014 if Input.is_action_pressed("shoot") else 0.0
+		weapon_root.position = weapon_root.position.lerp(base_pos + Vector3(0.0, 0.0, recoil), minf(delta * 22.0, 1.0))
 
 
 func _apply_pistol_stance(sprinting: bool, airborne: bool, aim_boost: float) -> void:
-	var lower: float = 12.0 if sprinting else 0.0
+	# Compact two-hand pistol stance: elbows slightly bent and below shoulder line.
+	var lower: float = 8.0 if sprinting else 0.0
 	if airborne:
-		lower = 7.0
+		lower = 5.0
 
-	_set_from_base("CC_Base_R_Clavicle", -2.0, -3.0, 6.0)
-	_set_from_base("CC_Base_L_Clavicle", -2.0, 3.0, -6.0)
-	_set_from_base("CC_Base_R_Upperarm", -43.0 + lower, -7.0, 29.0)
-	_set_from_base("CC_Base_L_Upperarm", -47.0 + lower, 10.0, -31.0)
-	_set_from_base("CC_Base_R_Forearm", -76.0 + lower * 0.35, -2.0, -4.0)
-	_set_from_base("CC_Base_L_Forearm", -82.0 + lower * 0.35, 3.0, 5.0)
-	_set_from_base("CC_Base_R_Hand", -4.0 - aim_boost * 2.0, 1.0, 2.0)
-	_set_from_base("CC_Base_L_Hand", -7.0 - aim_boost * 2.0, -1.0, -3.0)
+	_set_from_base("CC_Base_R_Clavicle", -2.0, -6.0, 4.0)
+	_set_from_base("CC_Base_L_Clavicle", -2.0, 7.0, -4.0)
+	_set_from_base("CC_Base_R_Upperarm", -35.0 + lower, -15.0, 17.0)
+	_set_from_base("CC_Base_L_Upperarm", -38.0 + lower, 17.0, -16.0)
+	_set_from_base("CC_Base_R_Forearm", -68.0 + lower * 0.35, 7.0, 3.0)
+	_set_from_base("CC_Base_L_Forearm", -72.0 + lower * 0.35, -7.0, -3.0)
+	_set_from_base("CC_Base_R_Hand", 5.0 - aim_boost * 2.0, 0.0, 6.0)
+	_set_from_base("CC_Base_L_Hand", 5.0 - aim_boost * 2.0, 0.0, -6.0)
 
 
 func _apply_rifle_stance(sprinting: bool, airborne: bool, aim_boost: float) -> void:
-	var lower: float = 14.0 if sprinting else 0.0
+	# High-ready carbine stance. The trigger elbow stays tucked; the support arm
+	# reaches forward under the handguard instead of crossing the chest.
+	var lower: float = 10.0 if sprinting else 0.0
 	if airborne:
-		lower = 8.0
+		lower = 6.0
 
-	_set_from_base("CC_Base_R_Clavicle", -3.0, -4.0, 8.0)
-	_set_from_base("CC_Base_L_Clavicle", -4.0, 5.0, -10.0)
-	_set_from_base("CC_Base_R_Upperarm", -38.0 + lower, -8.0, 24.0)
-	_set_from_base("CC_Base_L_Upperarm", -52.0 + lower, 13.0, -36.0)
-	_set_from_base("CC_Base_R_Forearm", -69.0 + lower * 0.30, -3.0, -4.0)
-	_set_from_base("CC_Base_L_Forearm", -88.0 + lower * 0.30, 4.0, 7.0)
-	_set_from_base("CC_Base_R_Hand", -3.0 - aim_boost * 2.0, 0.0, 3.0)
-	_set_from_base("CC_Base_L_Hand", -9.0 - aim_boost * 2.0, 0.0, -5.0)
+	_set_from_base("CC_Base_R_Clavicle", -3.0, -8.0, 5.0)
+	_set_from_base("CC_Base_L_Clavicle", -2.0, 11.0, -4.0)
+	_set_from_base("CC_Base_R_Upperarm", -32.0 + lower, -18.0, 18.0)
+	_set_from_base("CC_Base_L_Upperarm", -46.0 + lower * 0.70, 29.0, -12.0)
+	_set_from_base("CC_Base_R_Forearm", -73.0 + lower * 0.30, 9.0, 4.0)
+	_set_from_base("CC_Base_L_Forearm", -78.0 + lower * 0.25, -11.0, -5.0)
+	_set_from_base("CC_Base_R_Hand", 7.0 - aim_boost * 2.0, 1.0, 8.0)
+	_set_from_base("CC_Base_L_Hand", 9.0 - aim_boost * 2.0, -2.0, -9.0)
 
 
 func _set_from_base(bone_name: String, pitch_deg: float, yaw_deg: float, roll_deg: float) -> void:
@@ -165,49 +178,75 @@ func _create_weapon_attachment() -> void:
 
 
 func _rebuild_weapon() -> void:
+	if weapon_root == null:
+		return
 	for child: Node in weapon_root.get_children():
 		child.queue_free()
 
 	weapon_root.position = _weapon_base_position()
-	# AccuRIG hand basis differs from Godot weapon forward; this rotates barrel toward JEFE's -Z.
-	weapon_root.rotation_degrees = Vector3(2.0, 92.0, -88.0)
-
+	# AccuRIG right-hand local axes: rotate the weapon so the grip sits in the palm
+	# and the barrel points forward, not sideways across the chest.
 	if equipped_index == 0:
+		weapon_root.rotation_degrees = Vector3(-91.0, 5.0, 91.0)
+		weapon_root.scale = Vector3(0.88, 0.88, 0.88)
 		_build_tactical_pistol()
 	else:
+		weapon_root.rotation_degrees = Vector3(-92.0, 8.0, 92.0)
+		weapon_root.scale = Vector3(0.90, 0.90, 0.90)
 		_build_combat_rifle(equipped_index)
 
 
 func _weapon_base_position() -> Vector3:
 	if equipped_index == 0:
-		return Vector3(0.015, -0.035, -0.145)
-	return Vector3(0.020, -0.050, -0.205)
+		return Vector3(0.070, -0.015, -0.110)
+	return Vector3(0.105, -0.020, -0.155)
 
 
 func _build_tactical_pistol() -> void:
-	_add_box(weapon_root, Vector3(0.115, 0.105, 0.390), Vector3(0.0, 0.030, -0.185), weapon_dark)
-	_add_box(weapon_root, Vector3(0.105, 0.185, 0.105), Vector3(0.0, -0.105, -0.025), weapon_tan, Vector3(11.0, 0.0, 0.0))
-	_add_box(weapon_root, Vector3(0.092, 0.030, 0.310), Vector3(0.0, 0.091, -0.180), weapon_metal)
-	_add_cylinder(weapon_root, 0.021, 0.255, Vector3(0.0, 0.025, -0.405), weapon_dark, Vector3(90.0, 0.0, 0.0))
-	_add_box(weapon_root, Vector3(0.042, 0.032, 0.030), Vector3(0.0, 0.125, -0.285), sight_glow)
+	# Compact sidearm with a distinct slide, polymer grip, trigger guard and sights.
+	_add_box(weapon_root, Vector3(0.090, 0.075, 0.245), Vector3(0.0, 0.028, -0.118), weapon_dark)
+	_add_box(weapon_root, Vector3(0.082, 0.022, 0.210), Vector3(0.0, 0.080, -0.115), weapon_metal)
+	_add_box(weapon_root, Vector3(0.082, 0.155, 0.075), Vector3(0.0, -0.090, -0.020), weapon_tan, Vector3(12.0, 0.0, 0.0))
+	_add_box(weapon_root, Vector3(0.075, 0.034, 0.100), Vector3(0.0, -0.040, -0.082), weapon_tan)
+	_add_cylinder(weapon_root, 0.012, 0.120, Vector3(0.0, -0.050, -0.085), weapon_dark, Vector3(0.0, 0.0, 90.0))
+	_add_cylinder(weapon_root, 0.013, 0.165, Vector3(0.0, 0.024, -0.262), weapon_metal, Vector3(90.0, 0.0, 0.0))
+	_add_box(weapon_root, Vector3(0.025, 0.022, 0.022), Vector3(0.0, 0.105, -0.205), sight_glow)
 
 
 func _build_combat_rifle(index: int) -> void:
-	var long_variant: float = 0.10 * float(index - 1)
-	_add_box(weapon_root, Vector3(0.145, 0.180, 0.520 + long_variant), Vector3(0.0, 0.010, -0.245), weapon_dark)
-	_add_box(weapon_root, Vector3(0.125, 0.095, 0.370), Vector3(0.0, -0.105, -0.215), weapon_olive, Vector3(8.0, 0.0, 0.0))
-	_add_box(weapon_root, Vector3(0.120, 0.120, 0.330), Vector3(0.0, 0.015, 0.190), weapon_olive, Vector3(-7.0, 0.0, 0.0))
-	_add_box(weapon_root, Vector3(0.095, 0.245, 0.120), Vector3(0.0, -0.155, -0.105), weapon_dark, Vector3(13.0, 0.0, 0.0))
-	_add_cylinder(weapon_root, 0.023, 0.510 + long_variant, Vector3(0.0, 0.010, -0.660 - long_variant * 0.5), weapon_metal, Vector3(90.0, 0.0, 0.0))
-	_add_box(weapon_root, Vector3(0.080, 0.070, 0.175), Vector3(0.0, 0.145, -0.180), weapon_dark)
-	_add_box(weapon_root, Vector3(0.035, 0.030, 0.045), Vector3(0.0, 0.190, -0.230), sight_glow)
+	# Slim original sci-fi carbine sized for a 2.12 m armored soldier.
+	var variant: float = float(index - 1)
+	var barrel_extra: float = minf(variant * 0.025, 0.10)
+
+	# Central receiver and upper rail.
+	_add_box(weapon_root, Vector3(0.115, 0.135, 0.330), Vector3(0.0, 0.010, -0.145), weapon_dark)
+	_add_box(weapon_root, Vector3(0.090, 0.026, 0.320), Vector3(0.0, 0.094, -0.150), weapon_metal)
+	_add_box(weapon_root, Vector3(0.102, 0.090, 0.250), Vector3(0.0, 0.005, -0.420), weapon_olive)
+
+	# Rear stock sits against the shoulder instead of forming a huge block.
+	_add_box(weapon_root, Vector3(0.105, 0.105, 0.230), Vector3(0.0, 0.012, 0.150), weapon_olive, Vector3(-4.0, 0.0, 0.0))
+	_add_box(weapon_root, Vector3(0.120, 0.145, 0.075), Vector3(0.0, 0.005, 0.275), weapon_rubber, Vector3(-7.0, 0.0, 0.0))
+
+	# Pistol grip and magazine give the silhouette a believable center of mass.
+	_add_box(weapon_root, Vector3(0.075, 0.170, 0.075), Vector3(0.0, -0.125, -0.040), weapon_rubber, Vector3(14.0, 0.0, 0.0))
+	_add_box(weapon_root, Vector3(0.082, 0.210, 0.085), Vector3(0.0, -0.145, -0.185), weapon_dark, Vector3(9.0, 0.0, 0.0))
+
+	# Handguard and barrel.
+	_add_box(weapon_root, Vector3(0.105, 0.095, 0.280), Vector3(0.0, 0.000, -0.445), weapon_olive)
+	_add_cylinder(weapon_root, 0.015, 0.300 + barrel_extra, Vector3(0.0, 0.000, -0.730 - barrel_extra * 0.5), weapon_metal, Vector3(90.0, 0.0, 0.0))
+	_add_cylinder(weapon_root, 0.024, 0.080, Vector3(0.0, 0.000, -0.920 - barrel_extra), weapon_dark, Vector3(90.0, 0.0, 0.0))
+
+	# Compact optic and luminous front element.
+	_add_box(weapon_root, Vector3(0.075, 0.070, 0.105), Vector3(0.0, 0.145, -0.170), weapon_dark)
+	_add_box(weapon_root, Vector3(0.038, 0.025, 0.030), Vector3(0.0, 0.185, -0.205), sight_glow)
 
 
 func _build_materials() -> void:
 	weapon_dark = _mat(Color(0.025, 0.030, 0.032), 0.78, 0.24)
-	weapon_metal = _mat(Color(0.19, 0.21, 0.22), 0.88, 0.18)
-	weapon_olive = _mat(Color(0.18, 0.22, 0.105), 0.32, 0.48)
-	weapon_tan = _mat(Color(0.49, 0.34, 0.20), 0.08, 0.62)
+	weapon_metal = _mat(Color(0.18, 0.20, 0.21), 0.88, 0.18)
+	weapon_olive = _mat(Color(0.17, 0.21, 0.095), 0.30, 0.52)
+	weapon_tan = _mat(Color(0.48, 0.33, 0.19), 0.08, 0.62)
+	weapon_rubber = _mat(Color(0.035, 0.040, 0.038), 0.05, 0.88)
 	sight_glow = _mat(Color(0.20, 0.85, 0.30), 0.15, 0.30)
 	sight_glow.emission_enabled = true
 	sight_glow.emission = Color(0.20, 0.85, 0.30)
@@ -240,7 +279,7 @@ func _add_cylinder(parent: Node3D, radius: float, height: float, pos: Vector3, m
 	mesh.top_radius = radius
 	mesh.bottom_radius = radius
 	mesh.height = height
-	mesh.radial_segments = 12
+	mesh.radial_segments = 14
 	node.mesh = mesh
 	node.position = pos
 	node.rotation_degrees = rot
