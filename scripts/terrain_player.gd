@@ -1,7 +1,7 @@
 extends CharacterBody3D
 
-const BODY_SCRIPT: Script = preload("res://scripts/vanguard_m1_body.gd")
-const ARSENAL_SCRIPT: Script = preload("res://scripts/weapon_arsenal_primary.gd")
+const BODY_SCRIPT: Script = preload("res://scripts/jefe_body.gd")
+const ARSENAL_SCRIPT: Script = preload("res://scripts/jefe_weapon_arsenal.gd")
 
 var gravity: float = 9.8
 var pitch: float = 0.0
@@ -22,7 +22,7 @@ func _ready() -> void:
 	_configure_actions()
 	_build_collision()
 	_build_view_system()
-	_build_vanguard_body()
+	_build_jefe_body()
 	_build_weapon_rig()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
@@ -114,29 +114,30 @@ func _build_collision() -> void:
 
 func _build_view_system() -> void:
 	look_pivot = Node3D.new()
-	look_pivot.name = "VANGUARD_LOOK_PIVOT"
+	look_pivot.name = "JEFE_LOOK_PIVOT"
 	look_pivot.position = Vector3(0.0, 0.70, 0.0)
 	add_child(look_pivot)
 
 	first_camera = Camera3D.new()
-	first_camera.name = "FPS_CAMERA"
+	first_camera.name = "JEFE_FPS_CAMERA"
 	first_camera.fov = 74.0
 	first_camera.near = 0.035
 	first_camera.current = true
 	look_pivot.add_child(first_camera)
 
 	third_camera = Camera3D.new()
-	third_camera.name = "CHARACTER_PREVIEW_CAMERA"
-	third_camera.position = Vector3(0.0, 1.15, 4.6)
-	third_camera.fov = 67.0
+	third_camera.name = "JEFE_CHARACTER_CAMERA"
+	third_camera.position = Vector3(0.0, 1.08, 4.85)
+	third_camera.fov = 64.0
 	third_camera.near = 0.08
 	third_camera.current = false
 	look_pivot.add_child(third_camera)
 
 
-func _build_vanguard_body() -> void:
+func _build_jefe_body() -> void:
 	body_model = Node3D.new()
-	body_model.name = "VANGUARD_M1_BODY"
+	body_model.name = "JEFE_BODY"
+	body_model.position = Vector3(0.0, 0.18, 0.0)
 	body_model.set_script(BODY_SCRIPT)
 	body_model.visible = false
 	add_child(body_model)
@@ -144,7 +145,7 @@ func _build_vanguard_body() -> void:
 
 func _build_weapon_rig() -> void:
 	weapon_rig = Node3D.new()
-	weapon_rig.name = "VANGUARD_WEAPON_ARSENAL"
+	weapon_rig.name = "JEFE_WEAPON_ARSENAL"
 	weapon_rig.set_script(ARSENAL_SCRIPT)
 	first_camera.add_child(weapon_rig)
 
