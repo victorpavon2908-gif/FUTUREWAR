@@ -97,7 +97,7 @@ func _append_double_sided_triangle(target_faces: PackedVector3Array, a: Vector3,
 
 func _spawn_player() -> void:
 	player = CharacterBody3D.new()
-	player.name = "TerrainSurveyPlayer"
+	player.name = "Jefe"
 	player.set_script(TERRAIN_PLAYER)
 	var spawn: Vector3 = Vector3(0.0, 0.0, 132.0)
 	spawn.y = _terrain_height_at(spawn.x, spawn.z) + 2.4
