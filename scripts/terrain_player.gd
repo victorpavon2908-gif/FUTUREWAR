@@ -2,6 +2,7 @@ extends CharacterBody3D
 
 const BODY_SCRIPT: Script = preload("res://scripts/jefe_body.gd")
 const ARSENAL_SCRIPT: Script = preload("res://scripts/jefe_weapon_arsenal.gd")
+const COMBAT_SCRIPT: Script = preload("res://scripts/jefe_combat_overlay.gd")
 
 var gravity: float = 9.8
 var pitch: float = 0.0
@@ -14,6 +15,7 @@ var first_camera: Camera3D
 var third_camera: Camera3D
 var weapon_rig: Node3D
 var body_model: Node3D
+var combat_overlay: Node
 var third_person: bool = false
 
 
@@ -24,6 +26,7 @@ func _ready() -> void:
 	_build_view_system()
 	_build_jefe_body()
 	_build_weapon_rig()
+	_build_combat_overlay()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
@@ -48,6 +51,19 @@ func _physics_process(delta: float) -> void:
 	var speed_ratio: float = clampf(planar_speed / sprint_speed, 0.0, 1.0)
 	if body_model != null and body_model.has_method("update_pose"):
 		body_model.call("update_pose", delta, speed_ratio, sprinting)
+
+	# Apply the armed upper-body stance after locomotion so the legs can walk/run
+	# while JEFE keeps both hands committed to the weapon.
+	if combat_overlay != null and combat_overlay.has_method("apply_combat_pose"):
+		combat_overlay.call(
+			"apply_combat_pose",
+			delta,
+			speed_ratio,
+			sprinting,
+			not is_on_floor(),
+			Input.is_action_pressed("aim")
+		)
+
 	if weapon_rig != null:
 		weapon_rig.call("update_motion", speed_ratio, sprinting)
 		weapon_rig.call("set_trigger", Input.is_action_pressed("shoot"))
@@ -93,6 +109,8 @@ func _unhandled_input(event: InputEvent) -> void:
 func _equip(index: int) -> void:
 	if weapon_rig != null:
 		weapon_rig.call("equip_weapon", index)
+	if combat_overlay != null and combat_overlay.has_method("set_weapon_index"):
+		combat_overlay.call("set_weapon_index", index)
 
 
 func _toggle_view() -> void:
@@ -152,7 +170,7 @@ func _postprocess_jefe_external_model() -> void:
 		return
 
 	var production_3d: Node3D = production as Node3D
-	# The downloaded GLB faces +Z while FUTUREWAR's player faces -Z.
+	# Both imported JEFE bodies are aligned here to FUTUREWAR's -Z forward direction.
 	production_3d.rotation_degrees.y = 180.0
 	_fix_imported_materials(production_3d)
 
@@ -165,11 +183,8 @@ func _fix_imported_materials(node: Node) -> void:
 				var source_material: Material = mesh_instance.mesh.surface_get_material(surface)
 				if source_material is StandardMaterial3D:
 					var fixed_material: StandardMaterial3D = (source_material as StandardMaterial3D).duplicate() as StandardMaterial3D
-					# Some converted Sketchfab GLBs expose a grayscale map as emission in Godot,
-					# which makes the whole character render almost pure white. Disable it.
 					fixed_material.emission_enabled = false
 
-					# Keep every imported PBR texture while applying JEFE's military palette.
 					var material_name: String = String(fixed_material.resource_name).to_lower()
 					if material_name.contains("pants") or material_name == "material":
 						fixed_material.albedo_color = Color(0.48, 0.52, 0.43, 1.0)
@@ -190,6 +205,15 @@ func _build_weapon_rig() -> void:
 	weapon_rig.name = "JEFE_WEAPON_ARSENAL"
 	weapon_rig.set_script(ARSENAL_SCRIPT)
 	first_camera.add_child(weapon_rig)
+
+
+func _build_combat_overlay() -> void:
+	combat_overlay = Node.new()
+	combat_overlay.name = "JEFE_COMBAT_OVERLAY"
+	combat_overlay.set_script(COMBAT_SCRIPT)
+	add_child(combat_overlay)
+	combat_overlay.call("setup", body_model)
+	combat_overlay.call("set_weapon_index", 0)
 
 
 func _configure_actions() -> void:
