@@ -1,7 +1,7 @@
 extends CharacterBody3D
 
 const BODY_SCRIPT: Script = preload("res://scripts/jefe_body.gd")
-const ARSENAL_SCRIPT: Script = preload("res://scripts/weapon_arsenal_primary.gd")
+const ARSENAL_SCRIPT: Script = preload("res://scripts/jefe_weapon_arsenal.gd")
 
 var gravity: float = 9.8
 var pitch: float = 0.0
