@@ -33,13 +33,40 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Build debug APK
+      - name: Build release APK
         working-directory: qsignal-apk
-        run: gradle :app:assembleDebug --stacktrace
+        run: gradle :app:assembleRelease --stacktrace
 
-      - name: Upload APK
+      - name: Create temporary signing key
+        working-directory: qsignal-apk
+        run: |
+          keytool -genkeypair -v \
+            -keystore qsignal-release.jks \
+            -storepass qsignal12345 \
+            -keypass qsignal12345 \
+            -alias qsignal \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=QSignal AI, O=QSignal, C=NI"
+
+      - name: Align and sign APK
+        working-directory: qsignal-apk
+        run: |
+          BT="$ANDROID_HOME/build-tools/35.0.0"
+          "$BT/zipalign" -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/QSignal-AI-aligned.apk
+          "$BT/apksigner" sign \
+            --ks qsignal-release.jks \
+            --ks-key-alias qsignal \
+            --ks-pass pass:qsignal12345 \
+            --key-pass pass:qsignal12345 \
+            --out app/build/outputs/apk/release/QSignal-AI.apk \
+            app/build/outputs/apk/release/QSignal-AI-aligned.apk
+          "$BT/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/QSignal-AI.apk
+
+      - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: QSignal-AI-APK
-          path: qsignal-apk/app/build/outputs/apk/debug/app-debug.apk
+          name: QSignal-AI-SIGNED-APK
+          path: qsignal-apk/app/build/outputs/apk/release/QSignal-AI.apk
           if-no-files-found: error
