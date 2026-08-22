@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0B0D10">
+  <title>QSignal AI</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <div class="brand-row"><span class="mark">Q</span><strong>QSignal AI</strong><span class="pill live" id="connPill">Demo UI</span></div>
+        <p>Señales inteligentes · 1 a 5 minutos</p>
+      </div>
+      <button class="icon-btn" id="refreshBtn" aria-label="Actualizar">↻</button>
+    </header>
+
+    <section class="expiry-strip" aria-label="Expiración">
+      <button class="expiry active" data-expiry="1">1m</button><button class="expiry" data-expiry="2">2m</button><button class="expiry" data-expiry="3">3m</button><button class="expiry" data-expiry="4">4m</button><button class="expiry" data-expiry="5">5m</button>
+    </section>
+
+    <section class="hero">
+      <div class="signal-head">
+        <div><span class="eyebrow">MEJOR OPORTUNIDAD</span><h1 id="assetName">EUR/USD</h1><div class="price" id="entryPrice">1.08642</div></div>
+        <div class="signal-badge call" id="directionBadge"><span class="arrow" id="directionArrow">↑</span><span id="directionText">CALL</span></div>
+      </div>
+      <div class="metrics">
+        <div><span>Confianza</span><strong id="confidence">86%</strong></div><div><span>Payout</span><strong id="payout">88%</strong></div><div><span>Expira</span><strong id="expiryText">1 min</strong></div>
+      </div>
+      <div class="confidence-wrap"><div class="confidence-bar"><i id="confidenceBar" style="width:86%"></i></div><small id="signalState">Señal fuerte · esperando apertura de vela</small></div>
+      <div class="reason-grid" id="reasonGrid"><span>EMA alineadas</span><span>RSI 58.4</span><span>MACD confirma</span><span>Volatilidad sana</span></div>
+      <div class="notice"><span>●</span><p>Solo señal. La app no abre operaciones automáticamente.</p></div>
+    </section>
+
+    <section class="section-head"><div><span class="eyebrow">RADAR</span><h2>Mercado ahora</h2></div><span class="muted" id="updatedAt">Actualizado ahora</span></section>
+    <section class="market-list" id="marketList"></section>
+
+    <section class="history-card">
+      <div class="section-head compact"><div><span class="eyebrow">RENDIMIENTO</span><h2>Últimas señales</h2></div><strong class="winrate">73%</strong></div>
+      <div class="history-row"><span class="dot win"></span><b>EUR/USD</b><span>CALL · 2m</span><strong>WIN</strong></div>
+      <div class="history-row"><span class="dot win"></span><b>GBP/USD</b><span>PUT · 1m</span><strong>WIN</strong></div>
+      <div class="history-row"><span class="dot loss"></span><b>USD/JPY</b><span>CALL · 3m</span><strong>LOSS</strong></div>
+    </section>
+
+    <section class="settings-card" id="settingsPanel"><span class="eyebrow">CONEXIÓN</span><h2>Backend de señales</h2><label for="apiUrl">URL HTTPS del servidor</label><div class="input-row"><input id="apiUrl" type="url" placeholder="https://tu-bot.onrender.com"><button id="saveApiBtn">Guardar</button></div><small>Las credenciales de Quotex deben permanecer en el servidor, nunca dentro del APK.</small></section>
+
+    <nav class="bottom-nav" aria-label="Navegación"><button class="nav-item active" data-scroll="top"><span>◉</span><b>Señales</b></button><button class="nav-item" data-scroll="market"><span>⌁</span><b>Mercado</b></button><button class="nav-item" data-scroll="history"><span>◷</span><b>Historial</b></button><button class="nav-item" data-scroll="settings"><span>⚙</span><b>Ajustes</b></button></nav>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
