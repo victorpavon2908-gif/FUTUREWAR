@@ -1,0 +1,72 @@
+name: Build QSignal APK
+
+on:
+  push:
+    branches:
+      - qsignal-apk-build
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android packages
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build release APK
+        working-directory: qsignal-apk
+        run: gradle :app:assembleRelease --stacktrace
+
+      - name: Create temporary signing key
+        working-directory: qsignal-apk
+        run: |
+          keytool -genkeypair -v \
+            -keystore qsignal-release.jks \
+            -storepass qsignal12345 \
+            -keypass qsignal12345 \
+            -alias qsignal \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=QSignal AI, O=QSignal, C=NI"
+
+      - name: Align and sign APK
+        working-directory: qsignal-apk
+        run: |
+          BT="$ANDROID_HOME/build-tools/35.0.0"
+          "$BT/zipalign" -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/QSignal-AI-aligned.apk
+          "$BT/apksigner" sign \
+            --ks qsignal-release.jks \
+            --ks-key-alias qsignal \
+            --ks-pass pass:qsignal12345 \
+            --key-pass pass:qsignal12345 \
+            --out app/build/outputs/apk/release/QSignal-AI.apk \
+            app/build/outputs/apk/release/QSignal-AI-aligned.apk
+          "$BT/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/QSignal-AI.apk
+
+      - name: Upload signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: QSignal-AI-SIGNED-APK
+          path: qsignal-apk/app/build/outputs/apk/release/QSignal-AI.apk
+          if-no-files-found: error
